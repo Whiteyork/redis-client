@@ -1,0 +1,1 @@
+module.exports = ['GET', 'SET', 'KEYS']
