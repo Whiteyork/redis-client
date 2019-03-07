@@ -25,7 +25,7 @@ class RedisClient extends eventEmitter{
       this.connected = true;
       this.emit('connect');
 
-      this.offlineQueue.map(cmd => this._exec(cmd));
+      this.offlineQueue.map(cmd => this.exec(cmd));
     })
 
     netClient.on('data', (data) => {
@@ -48,19 +48,14 @@ class RedisClient extends eventEmitter{
   }
 
   // directly send total command to server with string
-  exec(cmd) {
-
-  }
-
-  _exec() {
+  exec() {
     const netClient = this.netClient;
     const command = arguments[0];
     let commandToSend = '';
 
     if(!this.connected) return this.offlineQueue.push(arguments[0]);
-    // console.log(`execute:  ${command}  `);
-    if(command instanceof String) {
-      commandToSend = JSON.stringify(command);
+    if(typeof command === 'string') {
+      commandToSend = command;
     } else if(command instanceof Array) {
       if(command.length === 0) {
         return this.emit('error', 'syntax error, directive cannot be empty');
@@ -77,7 +72,7 @@ class RedisClient extends eventEmitter{
 // add sugar method to prototype
 Redis_Commands.map(cmd => {
   RedisClient.prototype[cmd] = function() {
-    this._exec([cmd, ...arguments]);
+    this.exec([cmd, ...arguments]);
   }
   RedisClient.prototype[cmd.toLowerCase()] = RedisClient.prototype[cmd];
 })
